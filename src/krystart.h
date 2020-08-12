@@ -29,7 +29,7 @@
 #endif
 
 #ifndef CONFIGDIR /*This is available for good purpose.*/
-#define CONFIGDIR "/etc/settings/"
+#define CONFIGDIR "/etc/krystart/"
 #endif
 
 #ifndef LOGFILE
