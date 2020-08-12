@@ -1,0 +1,10 @@
+Krystart is a single-threaded init system for Linux 2.6+, designed to be useful yet small
+and unintrusive. It uses a declarative configuration style. It is a fork of Epoch init system.
+
+It has no dependencies whatsoever other than glibc, and /bin/sh is strongly recommended
+but can be disabled with --disable-shell.
+
+It supports process supervision, service status, autorestarting, stderr/stdout redirection,
+user/group setting, and much more.
+
+Krystart is public domain software. See UNLICENSE.TXT for more details.
