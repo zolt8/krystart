@@ -50,16 +50,17 @@ Bool AllNumeric(const char *InStream)
 
 ReturnCode WriteLogLine(const char *InStream, Bool AddDate)
 { /*This is pretty much the entire logging system.*/
-        FILE *Descriptor = NULL;
+    FILE *Descriptor = NULL;
 	char Hr[16], Min[16], Sec[16], Month[16], Day[16], Year[16], OBuf[MAX_LINE_SIZE + 64] = { '\0' };
 	static Bool FailedBefore = false;
+	int logToFile = strlen(LogFile) > 1;
 	
 	if (!EnableLogging)
 	{
 		return SUCCESS;
 	}
 
-	if(strlen(LogFile) > 1)
+	if(logToFile)
 	{
 		if (!LogInMemory && !(Descriptor = fopen(LogFile, "a")))
 		{
@@ -74,37 +75,43 @@ ReturnCode WriteLogLine(const char *InStream, Bool AddDate)
 	}
 	else
 	{
-		char* SysLogBuffer = malloc(strlen(InStream));
-		int i, j;
-		int colorCode = 0;
-		j = 0;
-		for(i=0;i<strlen(InStream);i++) //Color code filter
-		{
-		    if(colorCode)
-		    {
-		        if(InStream[i] == 'm')
-		        {
-		            colorCode = 0;
-		        }
-		    }
-		    else
-		    {
-		        if(InStream[i] == '\033')
-		        {
-		            colorCode = 1;
-		        }
-		        else
-		        {
-		            SysLogBuffer[j++]=InStream[i];
-		        }
-		    }
-		}
-		SysLogBuffer[j] = 0;
-		
-		openlog("Krystart", LOG_CONS, LOG_USER);
-		syslog(LOG_NOTICE, "%s", SysLogBuffer);
-		closelog();
-		free(SysLogBuffer);
+	   // snprintf(OBuf, MAX_LINE_SIZE, "%s\n", InStream);
+
+	    int len = strlen(InStream);
+	    if(len>0)
+	    {
+            //char* SysLogBuffer = malloc(len);
+
+            int i, j;
+            int colorCode = 0;
+            j = 0;
+            for(i=0;i<len;i++) //Color code filter
+            {
+                if(colorCode)
+                {
+                    if(InStream[i] == 'm')
+                    {
+                        colorCode = 0;
+                    }
+                }
+                else
+                {
+                    if(InStream[i] == '\033')
+                    {
+                        colorCode = 1;
+                    }
+                    else
+                    {
+                        OBuf[j++]=InStream[i];
+                    }
+                }
+            }
+            OBuf[j] = 0;
+
+            openlog("Krystart", LOG_CONS, LOG_USER);
+            syslog(LOG_NOTICE, "%s", OBuf);
+            closelog();
+	    }
 	}
 
 	GetCurrentTime(Hr, Min, Sec, Year, Month, Day);
@@ -132,10 +139,9 @@ ReturnCode WriteLogLine(const char *InStream, Bool AddDate)
 	}
 	else
 	{
-		if(strlen(LogFile) > 1)
+		if(logToFile)
 		{
 		    fwrite(OBuf, 1, strlen(OBuf), Descriptor);
-		
 		    fflush(Descriptor);
 		    fclose(Descriptor);
 		}

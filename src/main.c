@@ -1214,6 +1214,7 @@ static ReturnCode HandleKrystartCommand(int argc, char **argv)
 		Bool Enabling = ArgIs("enable");
 		char TOut[MAX_LINE_SIZE];
 		unsigned Inc = 2;
+		char OutBuf[MEMBUS_MSGSIZE], InBuf[MEMBUS_MSGSIZE];
 		
 		if (argc < 3)
 		{
@@ -1233,6 +1234,17 @@ static ReturnCode HandleKrystartCommand(int argc, char **argv)
 		/*Iterate through all specified objects.*/
 		for (Inc = 2; Inc < argc; ++Inc)
 		{
+		    /* Check if object exists */
+		    snprintf(OutBuf, sizeof OutBuf, "%s %s", MEMBUS_CODE_CHKOBJ, argv[Inc]);
+		    MemBus_Write(OutBuf, false);
+		    while (!MemBus_BinRead(InBuf, MEMBUS_MSGSIZE, false)) usleep(100);
+		    if (strcmp(MEMBUS_CODE_ACKNOWLEDGED " " MEMBUS_CODE_CHKOBJ, InBuf))
+		    {
+		        puts("Specified object not found.");
+		        continue;
+		    }
+
+
 			snprintf(TOut, sizeof TOut, (Enabling ? "Enabling %s" : "Disabling %s"), argv[Inc]);
 			BeginStatusReport(TOut);
 			
@@ -1250,6 +1262,7 @@ static ReturnCode HandleKrystartCommand(int argc, char **argv)
 		enum { START = 1, STOP, RESTART };
 		char TOut[MAX_LINE_SIZE];
 		unsigned Inc = 2;
+		char OutBuf[MEMBUS_MSGSIZE], InBuf[MEMBUS_MSGSIZE];
 
 		if (argc < 3)
 		{
@@ -1281,6 +1294,16 @@ static ReturnCode HandleKrystartCommand(int argc, char **argv)
 		/*Iterate through all provided arguments.*/
 		for (Inc = 2; Inc < argc; ++Inc)
 		{
+		    /* Check if object exists */
+		    snprintf(OutBuf, sizeof OutBuf, "%s %s", MEMBUS_CODE_CHKOBJ, argv[Inc]);
+		    MemBus_Write(OutBuf, false);
+		    while (!MemBus_BinRead(InBuf, MEMBUS_MSGSIZE, false)) usleep(100);
+		    if (strcmp(MEMBUS_CODE_ACKNOWLEDGED " " MEMBUS_CODE_CHKOBJ, InBuf))
+            {
+                puts("Specified object not found.");
+                continue;
+            }
+
 			if (StartMode < RESTART)
 			{
 				const char *ActionString = StartMode == START ? "Starting" : "Stopping";
@@ -1341,6 +1364,17 @@ static ReturnCode HandleKrystartCommand(int argc, char **argv)
 		/*Iterate through all objects they specified.*/
 		for (Inc = 2; Inc < argc; ++Inc)
 		{
+		    /* Check if object exists */
+		    snprintf(OutBuf, sizeof OutBuf, "%s %s", MEMBUS_CODE_CHKOBJ, argv[Inc]);
+		    MemBus_Write(OutBuf, false);
+		    while (!MemBus_BinRead(InBuf, MEMBUS_MSGSIZE, false)) usleep(100);
+		    if (strcmp(MEMBUS_CODE_ACKNOWLEDGED " " MEMBUS_CODE_CHKOBJ, InBuf))
+		    {
+		        puts("Specified object not found.");
+		        continue;
+		    }
+
+
 			snprintf(OutBuf, sizeof OutBuf, "%s %s", MEMBUS_CODE_OBJRELOAD, argv[Inc]);
 			
 			snprintf(PossibleResponses[0], MEMBUS_MSGSIZE, "%s %s", MEMBUS_CODE_ACKNOWLEDGED, OutBuf);
@@ -1415,6 +1449,17 @@ static ReturnCode HandleKrystartCommand(int argc, char **argv)
 		
 		if (!InitMemBus(false)) return FAILURE;
 		
+		/* Check if object exists */
+		snprintf(OutBuf, sizeof OutBuf, "%s %s", MEMBUS_CODE_CHKOBJ, argv[2]);
+		MemBus_Write(OutBuf, false);
+		while (!MemBus_BinRead(InBuf, MEMBUS_MSGSIZE, false)) usleep(100);
+		if (strcmp(MEMBUS_CODE_ACKNOWLEDGED " " MEMBUS_CODE_CHKOBJ, InBuf))
+		{
+		    puts("Specified object not found.");
+		    ShutdownMemBus(false);
+		    return FAILURE;
+		}
+
 		snprintf(OutBuf, sizeof InBuf, "%s %s", MEMBUS_CODE_SENDPID, argv[2]);
 		
 		snprintf(PossibleResponses[0], sizeof PossibleResponses[0], "%s %s ", MEMBUS_CODE_SENDPID, argv[2]);
@@ -1473,6 +1518,18 @@ static ReturnCode HandleKrystartCommand(int argc, char **argv)
 		
 		if (!InitMemBus(false)) return FAILURE;
 		
+
+		/* Check if object exists */
+        snprintf(OutBuf, sizeof OutBuf, "%s %s", MEMBUS_CODE_CHKOBJ, argv[2]);
+        MemBus_Write(OutBuf, false);
+        while (!MemBus_BinRead(InBuf, MEMBUS_MSGSIZE, false)) usleep(100);
+        if (strcmp(MEMBUS_CODE_ACKNOWLEDGED " " MEMBUS_CODE_CHKOBJ, InBuf))
+        {
+            puts("Specified object not found.");
+            ShutdownMemBus(false);
+            return FAILURE;
+        }
+
 		snprintf(OutBuf, sizeof OutBuf, "%s %s", MEMBUS_CODE_KILLOBJ, argv[2]);
 		
 		snprintf(PossibleResponses[0], sizeof PossibleResponses[0], "%s %s", MEMBUS_CODE_ACKNOWLEDGED, OutBuf);

@@ -410,6 +410,24 @@ void ParseMemBus(void)
 		MemBus_Write(OutBuf, true);
 		
 	}
+
+	else if (BusDataIs(MEMBUS_CODE_CHKOBJ))
+	{ /*Check object exists*/
+        ObjTable *Worker = ObjectTable;
+
+        for (; Worker->Next; Worker = Worker->Next)
+        {
+            if (strcmp(BusData + strlen(MEMBUS_CODE_CHKOBJ " "), Worker->ObjectID) == 0)
+            {
+                MemBus_Write(MEMBUS_CODE_ACKNOWLEDGED " " MEMBUS_CODE_CHKOBJ, true);
+                return;
+            }
+        }
+
+        /*Object not found.*/
+        MemBus_Write(MEMBUS_CODE_FAILURE " " MEMBUS_CODE_CHKOBJ, true);
+        return;
+	}
 	else if (BusDataIs(MEMBUS_CODE_LSOBJS))
 	{ /*Done for mostly third party stuff.*/
 		int Inc = 0;

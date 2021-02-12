@@ -65,7 +65,7 @@
 #endif
 
 /*Version.*/
-#define VERSIONSTRING "Krystart Init System V2.0"
+#define VERSIONSTRING "Krystart Init System V2.1"
 
 /*Power control magic.*/
 #define OSCTL_REBOOT 0x1234567
@@ -132,6 +132,7 @@
 #define MEMBUS_CODE_KILLOBJ "KILLOBJ"
 #define MEMBUS_CODE_SENDPID "SENDPID"
 #define MEMBUS_CODE_LSOBJS "LSOBJS"
+#define MEMBUS_CODE_CHKOBJ "CHKOBJ"
 #define MEMBUS_CODE_CFMERGE "CFMERGE"
 #define MEMBUS_CODE_CFUMERGE "CFUMERGE"
 
